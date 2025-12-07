@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plastering Apprentice App</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background-color: #333; color: white; padding: 1em; text-align: center; }
+    nav { display: flex; justify-content: space-around; background-color: #555; padding: 0.5em; }
+    nav button { color: white; background: none; border: none; font-size: 1em; cursor: pointer; }
+    nav button:hover { text-decoration: underline; }
+    .screen { display: none; padding: 1em; }
+    .active { display: block; }
+    ul { list-style: disc; padding-left: 20px; }
+    .guide-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1em;
+      margin-bottom: 1em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .image-placeholder {
+      border: 1px dashed #aaa;
+      border-radius: 6px;
+      padding: 0.75em;
+      margin-top: 0.5em;
+      font-size: 0.9em;
+      text-align: center;
+      color: #555;
+      background: #f9f9f9;
+    }
+    .progress-item {
+      margin-bottom: 0.5em;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Plastering Apprentice App</h1>
+</header>
+
+<nav>
+  <button onclick="showScreen('home')">Home</button>
+  <button onclick="showScreen('guides')">Guides</button>
+  <button onclick="showScreen('calculator')">Calculator</button>
+  <button onclick="showScreen('progress')">Progress</button>
+</nav>
+
+<div id="home" class="screen active">
+  <h2>Welcome!</h2>
+  <p>Track your plastering skills, use the calculator, and learn step-by-step guides.</p>
+  <p>Use the <strong>Guides</strong> tab to learn techniques and the <strong>Progress</strong> tab to tick off skills as you go.</p>
+</div>
+
+<div id="guides" class="screen">
+  <h2>Plastering Guides</h2>
+  <div id="guideContent"></div>
+</div>
+
+<div id="calculator" class="screen">
+  <h2>Plaster Calculator</h2>
+  <label>Wall Width (m): <input type="number" id="width" step="0.1"></label><br>
+  <label>Wall Height (m): <input type="number" id="height" step="0.1"></label><br>
+  <label>Plaster Type: 
+    <select id="plasterType">
+      <option value="standard">Standard</option>
+      <option value="finishing">Finishing</option>
+    </select>
+  </label><br><br>
+  <button onclick="calculatePlaster()">Calculate</button>
+  <p id="calcResult"></p>
+</div>
+
+<div id="progress" class="screen">
+  <h2>Progress Tracker</h2>
+  <p>Tick off skills as you practice them. Your progress is saved on this device.</p>
+  <div id="progressList"></div>
+</div>
+
+<script>
+  // --- Guides data with placeholder descriptions ---
+  const guides = {
+    "Dot & Dab Plastering": {
+      steps: [
+        "Ensure wall is clean, sound, and reasonably level.",
+        "Mark out vertical lines where adhesive dabs will go (about 300mm apart).",
+        "Apply adhesive dabs roughly palm-sized along the lines.",
+        "Press plasterboard firmly onto the dabs and tap with a straight edge to level.",
+        "Check plumb and flatness as you go."
+      ],
+      placeholder: "Diagram: Front view of wall with adhesive dabs and plasterboard being pressed into place."
+    },
+    "Skimming": {
+      steps: [
+        "Prepare surface (PVA or suitable primer if needed).",
+        "Mix plaster to a smooth, lump-free consistency.",
+        "Apply first coat evenly with a trowel, keeping a wet edge.",
+        "Apply second coat thinner, filling low spots.",
+        "Trowel up in stages as it firms up to achieve a smooth finish."
+      ],
+      placeholder: "Diagram: Cross-section of wall with two thin skim coats and trowel angle."
+    },
+    "Bonding": {
+      steps: [
+        "Dampen background if needed to control suction.",
+        "Apply bonding coat to roughly level the surface.",
+        "Rule off with a straight edge to flatten the wall.",
+        "Scratch the surface lightly to give a key for skim coat.",
+        "Allow to firm up before skimming."
+      ],
+      placeholder: "Diagram: Layer of bonding coat on uneven wall being ruled off with straight edge."
+    },
+    "Float Finishing": {
+      steps: [
+        "Apply base coat plaster to required thickness.",
+        "Use float to flatten and consolidate the surface.",
+        "Work in circular or sweeping motions to close in the surface.",
+        "Fill hollows and trim highs as you go.",
+        "Prepare surface ready for skim or final finish."
+      ],
+      placeholder: "Diagram: Float being used on wall, arrows showing circular motion."
+    },
+    "Applying Coving": {
+      steps: [
+        "Measure wall lengths and mark mitre cuts for internal/external corners.",
+        "Cut coving accurately with a mitre box or guide.",
+        "Apply coving adhesive to back edges of coving.",
+        "Press coving firmly into position along wall and ceiling line.",
+        "Clean off excess adhesive and smooth joints."
+      ],
+      placeholder: "Diagram: Coving section at wall/ceiling junction with adhesive points."
+    }
+  };
+
+  // Skills list for progress tracker (keys must match guides for consistency if reused)
+  const skills = [
+    "Dot & Dab Plastering",
+    "Skimming",
+    "Bonding",
+    "Float Finishing",
+    "Applying Coving"
+  ];
+
+  // --- Screen navigation ---
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    if (screenId === 'guides') loadGuides();
+    if (screenId === 'progress') loadProgress();
+  }
+
+  // --- Load guides with placeholders ---
+  function loadGuides() {
+    const guideDiv = document.getElementById('guideContent');
+    guideDiv.innerHTML = '';
+    for (const skill in guides) {
+      const data = guides[skill];
+      const card = document.createElement('div');
+      card.className = 'guide-card';
+      card.innerHTML = `
+        <h3>${skill}</h3>
+        <ul>${data.steps.map(step => `<li>${step}</li>`).join('')}</ul>
+        <div class="image-placeholder">
+          ${data.placeholder}<br>
+          <small>(Placeholder – later you can add a real photo or diagram here.)</small>
+        </div>
+      `;
+      guideDiv.appendChild(card);
+    }
+  }
+
+  // --- Progress tracker with localStorage ---
+  const PROGRESS_KEY = 'plastering_app_progress';
+
+  function loadProgress() {
+    const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+    const container = document.getElementById('progressList');
+    container.innerHTML = '';
+
+    skills.forEach(skill => {
+      const checked = !!saved[skill];
+      const id = `progress_${skill.replace(/\s+/g, '_').toLowerCase()}`;
+      const item = document.createElement('div');
+      item.className = 'progress-item';
+      item.innerHTML = `
+        <label>
+          <input type="checkbox" id="${id}" ${checked ? 'checked' : ''}>
+          ${skill}
+        </label>
+      `;
+      container.appendChild(item);
+
+      // Add listener to save changes
+      document.getElementById(id).addEventListener('change', (e) => {
+        const current = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+        current[skill] = e.target.checked;
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
+      });
+    });
+  }
+
+  // --- Calculator ---
+  function calculatePlaster() {
+    const width = parseFloat(document.getElementById('width').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const type = document.getElementById('plasterType').value;
+    if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+      alert('Please enter valid wall dimensions.');
+      return;
+    }
+    const area = width * height; // m²
+    // Very rough coverage assumptions (you can tweak these later)
+    const coveragePerBag = type === 'standard' ? 12 : 15; // m² per bag approx
+    const bagsNeeded = Math.ceil(area / coveragePerBag);
+    const waterRatio = type === 'standard' ? "Use manufacturer ratio (e.g. ~11–12L per 25kg bag)." 
+                                           : "Use manufacturer ratio for finishing plaster.";
+    document.getElementById('calcResult').innerText = 
+      `Wall area: ${area.toFixed(2)} m²\nApprox. ${bagsNeeded} bags of ${type} plaster needed.\n${waterRatio}`;
+  }
+</script>
+
+</body>
+</html>
