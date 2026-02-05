@@ -1,38 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plastering Apprentice App</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    header { background-color: #333; color: white; padding: 1em; text-align: center; }
-    nav { display: flex; justify-content: space-around; background-color: #555; padding: 0.5em; }
-    nav button { color: white; background: none; border: none; font-size: 1em; cursor: pointer; }
+    header { background: #333; color: #fff; padding: 1em; text-align: center; }
+    nav { display: flex; justify-content: space-around; background: #555; padding: 0.5em; }
+    nav button { color: #fff; background: none; border: none; font-size: 1em; cursor: pointer; }
     nav button:hover { text-decoration: underline; }
     .screen { display: none; padding: 1em; }
     .active { display: block; }
-    ul { list-style: disc; padding-left: 20px; }
+
     .guide-card {
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 1em;
       margin-bottom: 1em;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
     }
     .image-placeholder {
       border: 1px dashed #aaa;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 0.75em;
-      margin-top: 0.5em;
-      font-size: 0.9em;
+      margin-top: 0.75em;
+      font-size: 0.95em;
       text-align: center;
       color: #555;
       background: #f9f9f9;
     }
-    .progress-item {
-      margin-bottom: 0.5em;
-    }
+    textarea { font-family: Arial, sans-serif; }
+    button { border-radius: 8px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
@@ -50,8 +49,8 @@
 
 <div id="home" class="screen active">
   <h2>Welcome!</h2>
-  <p>Track your plastering skills, use the calculator, and learn step-by-step guides.</p>
-  <p>Use the <strong>Guides</strong> tab to learn techniques and the <strong>Progress</strong> tab to tick off skills as you go.</p>
+  <p>Guides, calculators, and skill tracking for apprentice plasterers.</p>
+  <p>Use <strong>Guides</strong> to learn, <strong>Calculator</strong> for quick estimates, and <strong>Progress</strong> to track skills with notes.</p>
 </div>
 
 <div id="guides" class="screen">
@@ -61,112 +60,111 @@
 
 <div id="calculator" class="screen">
   <h2>Plaster Calculator</h2>
-  <label>Wall Width (m): <input type="number" id="width" step="0.1"></label><br>
-  <label>Wall Height (m): <input type="number" id="height" step="0.1"></label><br>
-  <label>Plaster Type: 
+  <label>Wall Width (m): <input type="number" id="width" step="0.1"></label><br><br>
+  <label>Wall Height (m): <input type="number" id="height" step="0.1"></label><br><br>
+  <label>Plaster Type:
     <select id="plasterType">
       <option value="standard">Standard</option>
       <option value="finishing">Finishing</option>
     </select>
   </label><br><br>
-  <button onclick="calculatePlaster()">Calculate</button>
-  <p id="calcResult"></p>
+  <button onclick="calculatePlaster()" style="padding: 0.6em 0.9em;">Calculate</button>
+  <p id="calcResult" style="white-space: pre-line; margin-top: 0.75em;"></p>
 </div>
 
 <div id="progress" class="screen">
   <h2>Progress Tracker</h2>
-  <p>Tick off skills as you practice them. Your progress is saved on this device.</p>
+  <p>Your progress saves on this device.</p>
   <div id="progressList"></div>
 </div>
 
 <script>
-  // --- Guides data with placeholder descriptions ---
   const guides = {
     "Dot & Dab Plastering": {
       steps: [
         "Ensure wall is clean, sound, and reasonably level.",
-        "Mark out vertical lines where adhesive dabs will go (about 300mm apart).",
-        "Apply adhesive dabs roughly palm-sized along the lines.",
-        "Press plasterboard firmly onto the dabs and tap with a straight edge to level.",
-        "Check plumb and flatness as you go."
+        "Mark vertical lines for dabs (about 300mm apart).",
+        "Apply adhesive dabs along the lines (palm-sized).",
+        "Press board onto dabs and tap with straight edge to level.",
+        "Check plumb/flat as you go."
       ],
-      placeholder: "Diagram: Front view of wall with adhesive dabs and plasterboard being pressed into place."
+      placeholder: "Diagram: Wall with adhesive dabs and board being pressed level."
     },
+
     "Skimming": {
-  steps: [
-    "TOOLS NEEDED:",
-    "• Hawk, trowel, bucket trowel, paddle mixer, clean buckets, water brush",
+      steps: [
+        "TOOLS NEEDED:",
+        "• Hawk, trowel, bucket trowel, paddle mixer, clean buckets, water brush",
 
-    "MIXING:",
-    "• Always add plaster to water (not water to plaster)",
-    "• Mix until smooth and creamy — like thick custard",
-    "• No lumps or dry powder",
+        "MIXING:",
+        "• Always add plaster to water (not water to plaster)",
+        "• Mix until smooth and creamy — like thick custard",
+        "• No lumps or dry powder",
 
-    "FIRST COAT:",
-    "• Load hawk and apply plaster to wall",
-    "• Spread upward at about a 30° trowel angle",
-    "• Cover the whole wall quickly and evenly",
-    "• Don’t worry about perfection yet",
+        "FIRST COAT:",
+        "• Apply evenly and cover the full wall quickly",
+        "• Keep a wet edge — don’t overwork it",
+        "• Don’t chase perfection on the first coat",
 
-    "SECOND COAT:",
-    "• Apply thinner coat once first starts to firm up (10–20 mins)",
-    "• Fill low spots and flatten highs",
-    "• Work fast to keep a wet edge",
+        "SECOND COAT (when first firms up):",
+        "• Apply thinner coat",
+        "• Fill low spots and flatten highs",
+        "• Work fast and keep edges wet",
 
-    "TROWELING UP (TIMING IS KEY):",
-    "• First pass: flatten",
-    "• Second pass: tighten up",
-    "• Final pass: polish with clean trowel + light water brush",
+        "TROWELING UP (TIMING IS KEY):",
+        "• Pass 1: flatten",
+        "• Pass 2: tighten up",
+        "• Final pass: polish with clean trowel + light water brush",
 
-    "COMMON MISTAKES:",
-    "• Over-mixing (goes off too fast)",
-    "• Too wet mix (slides off wall)",
-    "• Going back too early or too late",
-    "• Dirty tools causing scratches",
+        "COMMON MISTAKES:",
+        "• Too wet (slides) / too dry (drags)",
+        "• Dirty tools causing scratches",
+        "• Going back too early or too late",
+        "• Letting edges dry out",
 
-    "PRO TIPS:",
-    "• Clean tools constantly",
-    "• Small areas first when learning",
-    "• Work top to bottom",
-    "• Keep edges wet to avoid dry lines"
-  ],
-  placeholder: "Diagram: Side view showing trowel angle and two skim coats with timing stages."
-}
-      placeholder: "Diagram: Cross-section of wall with two thin skim coats and trowel angle."
+        "PRO TIPS:",
+        "• Clean tools constantly",
+        "• Small areas first when learning",
+        "• Work top to bottom",
+        "• Keep the trowel angle consistent"
+      ],
+      placeholder: "Diagram: Trowel angle + two skim coats with timing stages."
     },
+
     "Bonding": {
       steps: [
-        "Dampen background if needed to control suction.",
-        "Apply bonding coat to roughly level the surface.",
-        "Rule off with a straight edge to flatten the wall.",
-        "Scratch the surface lightly to give a key for skim coat.",
-        "Allow to firm up before skimming."
+        "Control suction (dampen/PVA where needed).",
+        "Apply bonding to level out uneven areas.",
+        "Rule off with straight edge to flatten.",
+        "Lightly scratch for key if skimming over.",
+        "Let it firm up before finishing coat."
       ],
-      placeholder: "Diagram: Layer of bonding coat on uneven wall being ruled off with straight edge."
+      placeholder: "Diagram: Bonding coat ruled off flat on uneven wall."
     },
+
     "Float Finishing": {
       steps: [
-        "Apply base coat plaster to required thickness.",
-        "Use float to flatten and consolidate the surface.",
-        "Work in circular or sweeping motions to close in the surface.",
+        "Apply base coat to required thickness.",
+        "Use float to flatten and consolidate.",
+        "Work in controlled sweeps to close surface.",
         "Fill hollows and trim highs as you go.",
-        "Prepare surface ready for skim or final finish."
+        "Leave ready for skim or final finish."
       ],
-      placeholder: "Diagram: Float being used on wall, arrows showing circular motion."
+      placeholder: "Diagram: Float motion arrows across wall surface."
     },
+
     "Applying Coving": {
       steps: [
-        "Measure wall lengths and mark mitre cuts for internal/external corners.",
-        "Cut coving accurately with a mitre box or guide.",
-        "Apply coving adhesive to back edges of coving.",
-        "Press coving firmly into position along wall and ceiling line.",
-        "Clean off excess adhesive and smooth joints."
+        "Measure and mark internal/external corners.",
+        "Cut accurate mitres using guide/box.",
+        "Apply adhesive to rear edges.",
+        "Press into position along ceiling line.",
+        "Clean off excess and smooth joints."
       ],
-      placeholder: "Diagram: Coving section at wall/ceiling junction with adhesive points."
+      placeholder: "Diagram: Coving at wall/ceiling junction with adhesive."
     }
   };
 
-  // Skills list for progress tracker (keys must match guides for consistency if reused)
   const skills = [
     "Dot & Dab Plastering",
     "Skimming",
@@ -175,7 +173,6 @@
     "Applying Coving"
   ];
 
-  // --- Screen navigation ---
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
@@ -183,128 +180,146 @@
     if (screenId === 'progress') loadProgress();
   }
 
-  // --- Load guides with placeholders ---
-  function loadProgress() {
-  const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-  const container = document.getElementById('progressList');
-  container.innerHTML = '';
+  // --- Guides + Skim Timer + photo/video placeholders ---
+  function loadGuides() {
+    const guideDiv = document.getElementById('guideContent');
+    guideDiv.innerHTML = '';
 
-  skills.forEach(skill => {
-    const itemSaved = saved[skill] || {};
-    const checked = !!itemSaved.done;
-    const confidence = typeof itemSaved.confidence === "number" ? itemSaved.confidence : 3;
-    const notes = itemSaved.notes || "";
+    for (const skill in guides) {
+      const data = guides[skill];
+      const isSkimming = (skill === "Skimming");
 
-    const safeId = skill.replace(/\s+/g, '_').toLowerCase();
-    const checkId = `done_${safeId}`;
-    const sliderId = `conf_${safeId}`;
-    const notesId = `notes_${safeId}`;
-    const confLabelId = `confLabel_${safeId}`;
+      const stepsHtml = data.steps.map(step => `<li>${step}</li>`).join('');
 
-    const item = document.createElement('div');
-    item.className = 'guide-card';
-    item.innerHTML = `
-      <div class="progress-item">
-        <label>
-          <input type="checkbox" id="${checkId}" ${checked ? 'checked' : ''}>
-          <strong>${skill}</strong>
-        </label>
-      </div>
+      const skimmingExtras = isSkimming ? `
+        <div style="margin-top: 0.75em; padding: 0.75em; border: 1px solid #ddd; border-radius: 10px;">
+          <strong>⏱ Skim Timer</strong>
+          <p style="margin: 0.5em 0;">Tap “Start First Coat”. You’ll get reminders for second coat and troweling up.</p>
+          <button onclick="startSkimTimer()" style="padding: 0.55em 0.85em;">Start First Coat</button>
+          <button onclick="stopSkimTimer()" style="padding: 0.55em 0.85em; margin-left: 0.5em;">Stop</button>
+          <p id="skimTimerStatus" style="margin-top: 0.6em;"></p>
+          <small>Tip: timings vary by temperature/suction—use reminders as a guide and check firmness.</small>
+        </div>
+      ` : '';
 
-      <div style="margin-top: 0.5em;">
-        <label for="${sliderId}">⭐ Confidence: <strong id="${confLabelId}">${confidence}/5</strong></label><br>
-        <input type="range" id="${sliderId}" min="1" max="5" value="${confidence}" />
-      </div>
+      const card = document.createElement('div');
+      card.className = 'guide-card';
+      card.innerHTML = `
+        <h3>${skill}</h3>
+        <ul>${stepsHtml}</ul>
 
-      <div style="margin-top: 0.75em;">
-        <label for="${notesId}">📝 Notes (what went well / what to fix next time)</label><br>
-        <textarea id="${notesId}" rows="3" style="width: 100%;"></textarea>
-      </div>
-    `;
-    container.appendChild(item);
+        <div class="image-placeholder">
+          ${data.placeholder}<br>
+          <small>(Placeholder – add real images later.)</small>
+        </div>
 
-    // set textarea value after insertion
-    document.getElementById(notesId).value = notes;
+        <div class="image-placeholder">
+          📸 Photos: Good vs Bad finish (placeholder)
+        </div>
 
-    function save() {
-      const current = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-      current[skill] = current[skill] || {};
-      current[skill].done = document.getElementById(checkId).checked;
-      current[skill].confidence = Number(document.getElementById(sliderId).value);
-      current[skill].notes = document.getElementById(notesId).value;
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
+        <div class="image-placeholder">
+          🎥 30-sec clip (placeholder)
+        </div>
+
+        ${skimmingExtras}
+      `;
+      guideDiv.appendChild(card);
     }
-
-    document.getElementById(checkId).addEventListener('change', save);
-    document.getElementById(sliderId).addEventListener('input', (e) => {
-      document.getElementById(confLabelId).textContent = `${e.target.value}/5`;
-      save();
-    });
-    document.getElementById(notesId).addEventListener('input', save);
-  });
   }
 
-  // --- Progress tracker with localStorage ---
+  // --- Skim Timer (browser alerts) ---
+  let skimTimers = [];
+
+  function startSkimTimer() {
+    stopSkimTimer();
+
+    const statusEl = document.getElementById('skimTimerStatus');
+    if (statusEl) statusEl.textContent = "Timer started. Keep your edge wet.";
+
+    skimTimers.push(setTimeout(() => {
+      alert("Skimming: Check firmness — time for SECOND COAT if the first is firming up.");
+      const el = document.getElementById('skimTimerStatus');
+      if (el) el.textContent = "Reminder: second coat window (check firmness).";
+    }, 15 * 60 * 1000));
+
+    skimTimers.push(setTimeout(() => {
+      alert("Skimming: Start TROWELING UP (flatten pass).");
+      const el = document.getElementById('skimTimerStatus');
+      if (el) el.textContent = "Reminder: start troweling up (flatten).";
+    }, 35 * 60 * 1000));
+
+    skimTimers.push(setTimeout(() => {
+      alert("Skimming: FINAL PASS / polish (light water brush if needed).");
+      const el = document.getElementById('skimTimerStatus');
+      if (el) el.textContent = "Reminder: final pass / polish stage.";
+    }, 55 * 60 * 1000));
+  }
+
+  function stopSkimTimer() {
+    skimTimers.forEach(t => clearTimeout(t));
+    skimTimers = [];
+    const statusEl = document.getElementById('skimTimerStatus');
+    if (statusEl) statusEl.textContent = "Timer stopped.";
+  }
+
+  // --- Progress: checkbox + confidence + notes (saved) ---
   const PROGRESS_KEY = 'plastering_app_progress';
 
   function loadProgress() {
-  const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-  const container = document.getElementById('progressList');
-  container.innerHTML = '';
+    const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+    const container = document.getElementById('progressList');
+    container.innerHTML = '';
 
-  skills.forEach(skill => {
-    const itemSaved = saved[skill] || {};
-    const checked = !!itemSaved.done;
-    const confidence = typeof itemSaved.confidence === "number" ? itemSaved.confidence : 3;
-    const notes = itemSaved.notes || "";
+    skills.forEach(skill => {
+      const itemSaved = saved[skill] || {};
+      const checked = !!itemSaved.done;
+      const confidence = typeof itemSaved.confidence === "number" ? itemSaved.confidence : 3;
+      const notes = itemSaved.notes || "";
 
-    const safeId = skill.replace(/\s+/g, '_').toLowerCase();
-    const checkId = `done_${safeId}`;
-    const sliderId = `conf_${safeId}`;
-    const notesId = `notes_${safeId}`;
-    const confLabelId = `confLabel_${safeId}`;
+      const safeId = skill.replace(/\s+/g, '_').toLowerCase();
+      const checkId = `done_${safeId}`;
+      const sliderId = `conf_${safeId}`;
+      const notesId = `notes_${safeId}`;
+      const confLabelId = `confLabel_${safeId}`;
 
-    const item = document.createElement('div');
-    item.className = 'guide-card';
-    item.innerHTML = `
-      <div class="progress-item">
+      const card = document.createElement('div');
+      card.className = 'guide-card';
+      card.innerHTML = `
         <label>
           <input type="checkbox" id="${checkId}" ${checked ? 'checked' : ''}>
           <strong>${skill}</strong>
         </label>
-      </div>
 
-      <div style="margin-top: 0.5em;">
-        <label for="${sliderId}">⭐ Confidence: <strong id="${confLabelId}">${confidence}/5</strong></label><br>
-        <input type="range" id="${sliderId}" min="1" max="5" value="${confidence}" />
-      </div>
+        <div style="margin-top: 0.75em;">
+          <label for="${sliderId}">⭐ Confidence: <strong id="${confLabelId}">${confidence}/5</strong></label><br>
+          <input type="range" id="${sliderId}" min="1" max="5" value="${confidence}" />
+        </div>
 
-      <div style="margin-top: 0.75em;">
-        <label for="${notesId}">📝 Notes (what went well / what to fix next time)</label><br>
-        <textarea id="${notesId}" rows="3" style="width: 100%;"></textarea>
-      </div>
-    `;
-    container.appendChild(item);
+        <div style="margin-top: 0.75em;">
+          <label for="${notesId}">📝 Notes</label><br>
+          <textarea id="${notesId}" rows="3" style="width: 100%;"></textarea>
+        </div>
+      `;
+      container.appendChild(card);
 
-    // set textarea value after insertion
-    document.getElementById(notesId).value = notes;
+      document.getElementById(notesId).value = notes;
 
-    function save() {
-      const current = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-      current[skill] = current[skill] || {};
-      current[skill].done = document.getElementById(checkId).checked;
-      current[skill].confidence = Number(document.getElementById(sliderId).value);
-      current[skill].notes = document.getElementById(notesId).value;
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
-    }
+      function save() {
+        const current = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+        current[skill] = current[skill] || {};
+        current[skill].done = document.getElementById(checkId).checked;
+        current[skill].confidence = Number(document.getElementById(sliderId).value);
+        current[skill].notes = document.getElementById(notesId).value;
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
+      }
 
-    document.getElementById(checkId).addEventListener('change', save);
-    document.getElementById(sliderId).addEventListener('input', (e) => {
-      document.getElementById(confLabelId).textContent = `${e.target.value}/5`;
-      save();
+      document.getElementById(checkId).addEventListener('change', save);
+      document.getElementById(sliderId).addEventListener('input', (e) => {
+        document.getElementById(confLabelId).textContent = `${e.target.value}/5`;
+        save();
+      });
+      document.getElementById(notesId).addEventListener('input', save);
     });
-    document.getElementById(notesId).addEventListener('input', save);
-  });
   }
 
   // --- Calculator ---
@@ -312,18 +327,22 @@
     const width = parseFloat(document.getElementById('width').value);
     const height = parseFloat(document.getElementById('height').value);
     const type = document.getElementById('plasterType').value;
+
     if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
       alert('Please enter valid wall dimensions.');
       return;
     }
+
     const area = width * height; // m²
-    // Very rough coverage assumptions (you can tweak these later)
-    const coveragePerBag = type === 'standard' ? 12 : 15; // m² per bag approx
+    const coveragePerBag = (type === 'standard') ? 12 : 15; // rough estimate
     const bagsNeeded = Math.ceil(area / coveragePerBag);
-    const waterRatio = type === 'standard' ? "Use manufacturer ratio (e.g. ~11–12L per 25kg bag)." 
-                                           : "Use manufacturer ratio for finishing plaster.";
-    document.getElementById('calcResult').innerText = 
-      `Wall area: ${area.toFixed(2)} m²\nApprox. ${bagsNeeded} bags of ${type} plaster needed.\n${waterRatio}`;
+
+    const waterRatio = (type === 'standard')
+      ? "Water: follow bag instructions (often ~11–12L per 25kg)."
+      : "Water: follow finishing plaster instructions (varies by product).";
+
+    document.getElementById('calcResult').textContent =
+      `Wall area: ${area.toFixed(2)} m²\nApprox. bags needed: ${bagsNeeded}\n${waterRatio}`;
   }
 </script>
 
