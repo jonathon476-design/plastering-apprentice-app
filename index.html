@@ -184,23 +184,64 @@
   }
 
   // --- Load guides with placeholders ---
-  function loadGuides() {
-    const guideDiv = document.getElementById('guideContent');
-    guideDiv.innerHTML = '';
-    for (const skill in guides) {
-      const data = guides[skill];
-      const card = document.createElement('div');
-      card.className = 'guide-card';
-      card.innerHTML = `
-        <h3>${skill}</h3>
-        <ul>${data.steps.map(step => `<li>${step}</li>`).join('')}</ul>
-        <div class="image-placeholder">
-          ${data.placeholder}<br>
-          <small>(Placeholder – later you can add a real photo or diagram here.)</small>
-        </div>
-      `;
-      guideDiv.appendChild(card);
+  function loadProgress() {
+  const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+  const container = document.getElementById('progressList');
+  container.innerHTML = '';
+
+  skills.forEach(skill => {
+    const itemSaved = saved[skill] || {};
+    const checked = !!itemSaved.done;
+    const confidence = typeof itemSaved.confidence === "number" ? itemSaved.confidence : 3;
+    const notes = itemSaved.notes || "";
+
+    const safeId = skill.replace(/\s+/g, '_').toLowerCase();
+    const checkId = `done_${safeId}`;
+    const sliderId = `conf_${safeId}`;
+    const notesId = `notes_${safeId}`;
+    const confLabelId = `confLabel_${safeId}`;
+
+    const item = document.createElement('div');
+    item.className = 'guide-card';
+    item.innerHTML = `
+      <div class="progress-item">
+        <label>
+          <input type="checkbox" id="${checkId}" ${checked ? 'checked' : ''}>
+          <strong>${skill}</strong>
+        </label>
+      </div>
+
+      <div style="margin-top: 0.5em;">
+        <label for="${sliderId}">⭐ Confidence: <strong id="${confLabelId}">${confidence}/5</strong></label><br>
+        <input type="range" id="${sliderId}" min="1" max="5" value="${confidence}" />
+      </div>
+
+      <div style="margin-top: 0.75em;">
+        <label for="${notesId}">📝 Notes (what went well / what to fix next time)</label><br>
+        <textarea id="${notesId}" rows="3" style="width: 100%;"></textarea>
+      </div>
+    `;
+    container.appendChild(item);
+
+    // set textarea value after insertion
+    document.getElementById(notesId).value = notes;
+
+    function save() {
+      const current = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+      current[skill] = current[skill] || {};
+      current[skill].done = document.getElementById(checkId).checked;
+      current[skill].confidence = Number(document.getElementById(sliderId).value);
+      current[skill].notes = document.getElementById(notesId).value;
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
     }
+
+    document.getElementById(checkId).addEventListener('change', save);
+    document.getElementById(sliderId).addEventListener('input', (e) => {
+      document.getElementById(confLabelId).textContent = `${e.target.value}/5`;
+      save();
+    });
+    document.getElementById(notesId).addEventListener('input', save);
+  });
   }
 
   // --- Progress tracker with localStorage ---
